@@ -1,5 +1,5 @@
 # TeachR
-
+![alt text](https://imgur.com/gOXtA3f.jpg)
 ## Repository for lectures and notes from my office hours etc
 
 ### Contents:
