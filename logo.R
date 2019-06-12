@@ -1,8 +1,9 @@
 library(magick)
 library(tidyverse)
-bIgDaTa <- image_read('https://jeroen.github.io/images/bigdata.jpg')
-fRiNk <- image_read("https://jeroen.github.io/images/frink.png")
-LoGo <- image_read("https://jeroen.github.io/images/Rlogo.png")
-combo  <- c(bIgDaTa, fRiNk,LoGo)
+# From the docs for the excellent magick package
+bigdata <- image_read('https://jeroen.github.io/images/bigdata.jpg')
+frink <- image_read("https://jeroen.github.io/images/frink.png")
+logo <- image_read("https://jeroen.github.io/images/Rlogo.png")
+combo  <- c(bigdata, frink,logo)
 combo  %>% image_flatten('Add') %>% 
-	image_write(path = "mastRRace.png", format = "png")
+	image_write(path = "logo.png", format = "png")
