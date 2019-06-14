@@ -93,4 +93,6 @@ abslog(-3432, base = 2)
 	* an amazing resource for knitting
 * [knitr options](https://yihui.name/knitr/options/) 
 	* More knitting resources
+
+
 -[ ] more to come
