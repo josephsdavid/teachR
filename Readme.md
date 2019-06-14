@@ -95,4 +95,4 @@ abslog(-3432, base = 2)
 	* More knitting resources
 
 
--[ ] more to come
+- [ ] more to come
