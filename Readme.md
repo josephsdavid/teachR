@@ -22,4 +22,4 @@
 
 ## The basic structure of a good R project
 
-This repository is a glimpse of what a well structured R project looks like. In general, we put R code in the **R** directory, the pretty output in its own directory, images in a directory, and low level code in a src directory. If you intend on developing an R package, which i would be happy to discuss, a good reading is [Hadley's "package structure"](http://r-pkgs.had.co.nz/package.html)
+This repository is a glimpse of what a well structured R project looks like. In general, we put R code in the **R** directory, the pretty output in its own directory, images in a directory, and low level code in a src directory. If you intend on developing an R package, which i would be happy to discuss, a good reading is [Hadley's "package structure"](http://r-pkgs.had.co.nz/package.html). This is also just useful information to use on your own R projects. I will provide (opinionated) thoughts on workflow, project structure, etc. later on.
