@@ -6,4 +6,4 @@ frink <- image_read("https://jeroen.github.io/images/frink.png")
 logo <- image_read("https://jeroen.github.io/images/Rlogo.png")
 combo  <- c(bigdata, frink,logo)
 combo  %>% image_flatten('Add') %>% 
-	image_write(path = "logo.png", format = "png")
+	image_write(path = "../fig/logo.png", format = "png")
