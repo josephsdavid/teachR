@@ -17,3 +17,9 @@
 		* Discusses how we should avoid for loops and "growing vectors" in general, due to some of the fun little quirks of R.
 * [src](src/): contains C/C++ code that is used to speed up R. Currently this is empty, and we may not use this directory. Interested parties can make an issue request, email me, or message me on slack and we will work on this. For now, it is enough to know this is part of the structure of a big R project.
 * [fig](fig/): contains images and figures generated
+
+
+
+## The basic structure of a good R project
+
+This repository is a glimpse of what a well structured R project looks like. In general, we put R code in the **R** directory, the pretty output in its own directory, images in a directory, and low level code in a src directory. If you intend on developing an R package, which i would be happy to discuss, a good reading is [Hadley's "package structure"](http://r-pkgs.had.co.nz/package.html)
