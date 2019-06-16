@@ -12,6 +12,8 @@
 		* a quick primer on dplyr
 	* [count-and-pipes.R](R/count-and-pipes.R)
 		* Counting with dplyr and piping with magrittr 
+	* [applied.R](R/applied.R)
+		* Contains the first really advanced stuff that we will do in here, apply/lapply review, which is the equivalent mathematically of mapping, anonymous functions, lists of functions, "function factories" (closures), and finally brings everything together in one crazy example. Will be made into a .Rmd soon enough
 * [pres](pres/): contains all Rmarkdown and knitted results. Contents below:
 	* [copyonmodify](pres/copyonmodify.md)
 		* Discusses how we should avoid for loops and "growing vectors" in general, due to some of the fun little quirks of R.
