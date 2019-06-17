@@ -1,78 +1,75 @@
-
-
-
-library(tidyverse)
+## @knitr libs
 library(rvest)
-library("humaniformat")
+library(tidyverse)
 
-harrypotter = 'http://www.imdb.com/title/tt1201607/fullcredits?ref_=tt_ql_1'
-html_scraper <-function(url,elem) {
-  read_html(url)%>% html_nodes("table")%>%.[[elem]] %>% html_table ->out
+
+## @knitr datadef
+lotr  <- 'https://www.imdb.com/title/tt0120737/fullcredits?ref_=tt_cl_sm#cast'
+
+## @knitr html_read-1
+read_html(lotr)
+## @knitr html_read-2
+rawdata <- read_html(lotr)
+
+## @knitr html_read-3
+tables <- html_nodes(rawdata, "table")
+
+## @knitr nodes
+ateam <- read_html("http://www.boxofficemojo.com/movies/?id=ateam.htm")
+center <- html_nodes(ateam, "center") 
+
+## @knitr list
+x <- list("char" = c("cat","dog"), "nest" = list((1:3),2:4), "int" = 4:5, "logical" = c(T,F,T,F), "float" = c(87.5, -962.4))
+
+## @knitr table_choose
+table1 <- tables[[1]]
+table2 <- tables[[2]]
+table3 <- tables[[3]]
+
+## @knitr table_clean
+cast <- rvest::html_table(table3)
+## @knitr pipes
+read_html(lotr) %>% html_nodes("table") %>% .[[3]]  %>% html_table -> cast
+
+## @knitr scraper
+tablescraper <- function(url, item){
+  read_html(url) %>% html_nodes("table") %>% . [[item]] %>% html_table -> out
   return(out)
 }
-html_scraper(harrypotter,3)-> cast
-head(cast,10)
-#    X1               X2  X3                         X4
-# 1                                                    
-# 2        Ralph Fiennes ...             Lord Voldemort
-# 3       Michael Gambon ... Professor Albus Dumbledore
-# 4         Alan Rickman ...    Professor Severus Snape
-# 5     Daniel Radcliffe ...               Harry Potter
-# 6         Rupert Grint ...                Ron Weasley
-# 7          Emma Watson ...           Hermione Granger
-# 8         Evanna Lynch ...              Luna Lovegood
-# 9     Domhnall Gleeson ...               Bill Weasley
-# 10      Clémence Poésy ...             Fleur Delacour
-cast$X1<-NULL
-cast$X3<-NULL
-head(cast,10)
-#                  X2                         X4
-# 1                                             
-# 2     Ralph Fiennes             Lord Voldemort
-# 3    Michael Gambon Professor Albus Dumbledore
-# 4      Alan Rickman    Professor Severus Snape
-# 5  Daniel Radcliffe               Harry Potter
-# 6      Rupert Grint                Ron Weasley
-# 7       Emma Watson           Hermione Granger
-# 8      Evanna Lynch              Luna Lovegood
-# 9  Domhnall Gleeson               Bill Weasley
-# 10   Clémence Poésy             Fleur Delacour
-cast<- cast[-1,]
-head(cast,10)
-#                  X2                                                  X4
-# 2     Ralph Fiennes                                      Lord Voldemort
-# 3    Michael Gambon                          Professor Albus Dumbledore
-# 4      Alan Rickman                             Professor Severus Snape
-# 5  Daniel Radcliffe                                        Harry Potter
-# 6      Rupert Grint                                         Ron Weasley
-# 7       Emma Watson                                    Hermione Granger
-# 8      Evanna Lynch                                       Luna Lovegood
-# 9  Domhnall Gleeson                                        Bill Weasley
-# 10   Clémence Poésy                                      Fleur Delacour
-# 11    Warwick Davis Griphook /  \n            Professor Filius Flitwick
 
-sapply(cast, function(x){gsub("[\r\n]","",x)}) -> cast
-cast<-as.data.frame(cast)
-sapply(cast, function(x){gsub("\\s+","",x)})->cast
-cast<-as.data.frame(cast)
-head(cast,10)
-#               cast
-# 1     RalphFiennes
-# 2    MichaelGambon
-# 3      AlanRickman
-# 4  DanielRadcliffe
-# 5      RupertGrint
-# 6       EmmaWatson
-# 7      EvannaLynch
-# 8  DomhnallGleeson
-# 9    ClémencePoésy
-# 10    WarwickDavis
-colnames(cast)<-c("Actor","Character")
-first<-first_name(cast$Actor)
-middle<-middle_name(cast$Actor)
-middle[is.na(middle)]<-""
-last<-last_name(cast$Actor)
-firstName<-paste(first,middle)
-cleancast<-data.frame("FirstName"=firstName,"Surname"=last,"Character"=cast$Character)
-head(cleancast)
+## @knitr search
+tablescraper(lotr,1) %>% head
+
+tablescraper(lotr,2) %>% head
+
+tablescraper(lotr,3) -> cast
+## @knitr clean-1
+cast <- cast[-1,]
+cast$X1 <- NULL
+cast$X3 <- NULL
+
+## @knitr rename
+cast %>% rename(Actor = X2, Character = X4) -> cast
+
+## @knitr grepl
+cast<-cast[!grepl("Rest of cast listed alphabetically:", cast$Actor),]
+## @knitr regex1
+cast$Character<-gsub("[\r\n]","",cast$Character)
+## @knitr regex2
+cast$Character<-gsub("\\s+"," ",cast$Character)
+
+## @knitr trash
+
+head(cast)
+html_table(html_nodes(pokemon,table)[[2]])
+ateam <- read_html("http://www.boxofficemojo.com/movies/?id=ateam.htm")
+html_nodes(ateam, "center") 
+
+
+data(mtcars)
+library(ggplot2)
+head(mtcars)
+ggplot(data = mtcars, aes(x = cyl, y = mpg, fill = gear))+geom_bar(stat ="identity") + theme_minimal()
+
+
 

@@ -3,6 +3,12 @@
 ## Repository for lectures and notes from my office hours etc
 
 ### Contents:
+
+* [pres](pres/): contains all Rmarkdown and knitted results. Contents below:
+	* [html-scraping](pres/html-scraping.md)
+		* Contains a primer on scraping websites with `rvest`, as well as a slight introduction to pipes, and a few user created functions. Read this then [scraping.R](R/scraping.R) as a followup with more code to play with. 
+	* [copyonmodify](pres/copyonmodify.md)
+		* Discusses how we should avoid for loops and "growing vectors" in general, due to some of the fun little quirks of R.
 * [R](R/): contains all R code. Contents below:
 	* [logo.R](R/logo.R)
 		* R code used to make the logo for this repository
@@ -14,9 +20,6 @@
 		* Counting with dplyr and piping with magrittr 
 	* [applied.R](R/applied.R)
 		* Contains the first really advanced stuff that we will do in here, apply/lapply review, which is the equivalent mathematically of mapping, anonymous functions, lists of functions, "function factories" (closures), and finally brings everything together in one crazy example. Will be made into a .Rmd soon enough
-* [pres](pres/): contains all Rmarkdown and knitted results. Contents below:
-	* [copyonmodify](pres/copyonmodify.md)
-		* Discusses how we should avoid for loops and "growing vectors" in general, due to some of the fun little quirks of R.
 * [src](src/): contains C/C++ code that is used to speed up R. Currently this is empty, and we may not use this directory. Interested parties can make an issue request, email me, or message me on slack and we will work on this. For now, it is enough to know this is part of the structure of a big R project.
 * [fig](fig/): contains images and figures generated
 * [data](data/): contains minimal data. It is best to save data here not in csv format, but as RData/rda, because it is much much lighter.

@@ -1,0 +1,182 @@
+---
+title: "HTML Scraping in R"
+author: "David Josephs"
+output: html_document
+---
+
+```{r setup, include = F}
+knitr::read_chunk('../R/scraping.R')
+library(knitr)
+library(kableExtra)
+library(magrittr)
+library(pander)
+knitr::opts_chunk$set(cache = T, autodep = T)
+```
+# Lord of the Rings Example
+
+## Setup
+
+First, lets load up two libraries which will make our life easier. First is rvest, which is a great library for reading html, it is basically an extension of the xml2 package. It has some easy syntax and is quite helpful going forwards.
+
+The second one is in my opinion, one of the most useful libraries for doing any sort of data science or data analysis in R, the tidyverse. Just google it and see the documentation, it is a set of packages in which all of the functions have similar APIs and arguments, allowing for consistency throughout our programmig. They are also all pretty fast, with nice syntax. Examples from the tidyverse are: readr (data loading), dplyr(data analysis/cleaning/general utility), tidyr(data cleaning again, reshaping), caret(machine learning), and ggplot2(data viz). 
+
+```{r, message=F}
+<<libs>>
+```
+
+Next lets load up our data. In this example we will be looking at the imdb page for lord of the rings. So we will assign a variable to the url of the page we are interested in:
+
+```{r dataload}
+<<datadef>>
+```
+
+## Reading the data
+
+### The pipe operator
+
+Before we can read in the data, lets first learn about `%>%` pipes. A pipe is basically saying, take the thing on the left, and make it an argument of a thing on the right. For example, lets say we want to take the mean of mtcars, the classic R example dataset, with all columns. We can do that with:
+
+```{r}
+lapply(mtcars,mean)
+```
+
+This is mapping the mean function over the mtcars dataset. Now, the output of this is not very pretty, so we will turn it into a nice, horizontal data frame:
+
+```{r}
+as.data.frame(lapply(mtcars,mean))
+```
+
+Still ugly. Lets try and use the pander library to make this look nice:
+
+```{r}
+pander(as.data.frame(lapply(mtcars,mean)))
+```
+
+Much better, but look at how many parentheses we wrote, and how difficult this is to read. Imagine if we had 4 or 5 more steps. We would have to repeatedly assign things to new variables, and keep working and working and putting things in our computers memory to have readable code. Even then, if we assigned a variable on every step, someone reviewing your code would end up having to know 20 or so lines of code above, just to understand the final printing line. This leads to errors and is not reproducible. Instead, lets try it with the pipe operator. Mathematically, `f(x,y) = x %>% f(y)`, if that helps:
+
+```{r}
+mtcars %>% lapply(mean) %>% as.data.frame %>% pander
+```
+
+This reads from left to right (as we english speakers are in the habit of doing):
+First, we take the mtcars dataset. Then, we apply the mean function onto every column of the dataset, outputting into the form of a list. We then turn the list, which is hard to read, into a nice flat data frame, and then we pretty up the data frame in a final step. This is the pipe operator.
+
+### Actually reading in the data
+
+So, with our knowledge of the pipe operator, what can we do? Lets use rvest functions to turn the raw xml and/or html data into something nice and human human readbale. 
+
+First, lets read in the website:
+
+```{r, eval = F}
+# not run
+read_html(lotr)
+```
+
+Next lets choose all the tables (we know all of our data is in tables) in the raw data, with the `html_nodes()` function:
+
+```{r, eval = F}
+read_html(lotr) %>% html_nodes("table")
+```
+
+Next, lets choose the right table. By looking at the website, we know that the third table contains the info on the cast. To choose the third table of an unnamed object, we are going to have to use the `.` operator, which we will see is just a placeholder for the thing on the left.
+
+
+```{r, eval = F}
+read_html(lotr) %>% html_nodes("table") %>% .[[3]]
+```
+
+#### An Aside on lists
+Why did we do `[[]]`?
+This is because html_nodes outputs a list, and there are three ways we can get items from a list, `$`, for named items, keeps the type of the item if it is some sort of vector. `[]` allows us to index the list, but the output is always in the form of a list, eg, data type is extracted at some other set. Third, we have `[[]]`, which allows us to index the list and get the proper data type in an output. Experiment with this by using the following list as well as the built in `typeof()` function.
+
+```{r}
+<<list>>
+```
+
+### Back to Business
+
+Now that we understand what `.[[3]]` is doing, we can now extract the full dataset:
+
+```{r}
+<<pipes>>
+(head(cast))
+```
+
+Great. Now that process was pretty painful, and took a lot of typing, and in the future we may not know which table we are looking for, so lets write a nice little function to do this all in one step:
+
+
+```{r}
+<<scraper>>
+```
+
+Now that we have a nice function, we can iteratively search through the IMDB site:
+
+```{r}
+<<search>>
+```
+
+We can even imagine, for a large project, just writing a for loop to do all of this.
+Next, lets check out the first and last ten items of cast:
+
+```{r}
+ht <- function(x,...){
+	head(x,...)
+	tail(x,...)
+}
+ht(cast,10)
+```
+
+***NOTE***: the `...` in our function allows for extra arguments. We do this so we can throw in the extra parameter, `10` which changes head and tail to showing the first and last 10 instead of the first and last 6 items.
+
+## Cleaning the data
+Wow, this data is a mess. The first thing we see is that the first row is entirely blank, and then that the first and third columns are completely empty. Lets get rid of that:
+
+```{r}
+<<clean-1>>
+ht(cast)
+```
+
+Next, lets rename with dplyr:
+
+```{r}
+<<rename>>
+```
+
+Looking better, now we know from the IMDB website that the table contains"Rest of cast listed alphabetically:", so lets get rid of that. To do this, we are going to use `grepl()`
+
+`grepl()` searches for a pattern and then returns a logical (true/false) vector of whether or not there is a match. We can then index `cast` for all rows where the result of `grepl` are not true, eliminating the unwanted line:
+
+```{r}
+<<grepl>>
+```
+
+
+Try and see how this dplyr syntax is different from doing it in base R as a learning challenge, and see which one you prefer.
+
+Next lets get rid of those nasty `\n`'s. To do this, lets use `gsub()`, short for global substite. Since we dont know how all newlines are delimited, we will search for all types of newlines, `\n` (unix) `\r\n` (windows) and `\r` (old web line endings). To do this, we will use the regular expression `[\r\n]`. This allows us to search for `\r`,`\n`, and `\r\n` (thats what the brackets do). Lets turn those all into nothing.
+
+```{r}
+<<regex1>>
+ht(cast)
+```
+
+Now, we have a ton of whitespace. Lets get rid of that. The regular expression for a single space is `\s`. But, we want to get rid of more than one space, and the regular expression for that is `\s+`. Lets combine the two so we are looking for all spaces, by doing `\s\s+`. That however is not very pretty, so lets combine one step further, and rewrite as `\\s+`. This is going to match with all amounts of whitespace. Lets turn all of these into a single space:
+
+```{r}
+<<regex2>>
+ht(cast)
+```
+
+Excellent work, we have now turned a once very ugly raw frame into something we can work with. 
+
+# A challenge:
+
+Two challenges here:
+
+* Is there another way we could have cleaned up the `\n` or the `\s`? Try out `library(stringr)` and explore the functions there.
+
+* Try separating first name from last name  (eg make a first and last name column), using whatever means necessary (this is in your homework assignment this week)
+
+# Note
+
+To see more examples and play around with the source code for this document, see `R/scraping.R`

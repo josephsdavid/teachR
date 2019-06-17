@@ -83,7 +83,7 @@ lapply(operator, function(f) f(x))
 
 # wild stuff
 
-# function factories
+# function factories, closures
 
 power  <- function(exponent){
 	myfunction <- function(x){
