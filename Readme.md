@@ -55,6 +55,15 @@ df<-load('../data/myfile.RData')
 ```
 
 ## Links to other useful sites and readings
+
+* [awesome-msds](https://github.com/drake-smu/awesome-msds-smu)
+	* a MSDS student's repository containing awesome resources for the program 
+* [awesome-r](https://awesome-r.com/#awesome-r)
+	* awesome R packages
+* [rmarkdown manual](https://bookdown.org/yihui/rmarkdown/)
+	* an amazing resource for knitting
+* [knitr options](https://yihui.name/knitr/options/) 
+	* More knitting resources
 * [why should I use functions](https://nicercode.github.io/guides/functions/)
 	* Functions not only make your code more readable, but they can also make repitive tasks easier. In my ***opinion***, we should write many small functions and combine them in a bigger function. This makes our code more readable, and more overall useful. See below for an example:
 ```R
@@ -89,15 +98,6 @@ abslog(3432, base = 2)
 abslog(-3432, base = 2)
 # [1] 11.74483
 ```
-
-* [awesome-msds](https://github.com/drake-smu/awesome-msds-smu)
-	* a MSDS student's repository containing awesome resources for the program 
-* [awesome-r](https://awesome-r.com/#awesome-r)
-	* awesome R packages
-* [rmarkdown manual](https://bookdown.org/yihui/rmarkdown/)
-	* an amazing resource for knitting
-* [knitr options](https://yihui.name/knitr/options/) 
-	* More knitting resources
 
 
 - [ ] more to come
