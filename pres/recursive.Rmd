@@ -1,0 +1,48 @@
+---
+title: "recursion"
+author: "David Josephs"
+output: html_document
+---
+
+```{r setup, include = F}
+knitr::read_chunk('../R/recursive.R')
+library(knitr)
+library(kableExtra)
+library(magrittr)
+library(pander)
+knitr::opts_chunk$set(cache = T, autodep = T)
+```
+
+```{r}
+<<setup>>
+```
+
+```{r}
+<<first>>
+```
+
+Make a countdown function
+
+```{r}
+# <<countdown>>
+```
+
+
+## work with lists
+
+```{r}
+<<listtool>>
+```
+
+
+```{r}
+<<sumpair>>
+```
+
+```{r}
+<<firstitem>>
+```
+
+```{r}
+#<<seconds>>
+```
