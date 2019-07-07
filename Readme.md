@@ -20,6 +20,8 @@
 		* Counting with dplyr and piping with magrittr 
 	* [applied.R](R/applied.R)
 		* Contains the first really advanced stuff that we will do in here, apply/lapply review, which is the equivalent mathematically of mapping, anonymous functions, lists of functions, "function factories" (closures), and finally brings everything together in one crazy example. Will be made into a .Rmd soon enough
+	* [lm_1.R](R/lm_1.R) 
+		* Contains the basics of linear modeling 
 * [src](src/): contains C/C++ code that is used to speed up R. Currently this is empty, and we may not use this directory. Interested parties can make an issue request, email me, or message me on slack and we will work on this. For now, it is enough to know this is part of the structure of a big R project.
 * [fig](fig/): contains images and figures generated
 * [data](data/): contains minimal data. It is best to save data here not in csv format, but as RData/rda, because it is much much lighter.
