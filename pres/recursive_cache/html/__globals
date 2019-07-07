@@ -1,0 +1,7 @@
+unnamed-chunk-1	is_empty	length	xs	c	integer	hd	stop	x	tl
+unnamed-chunk-2	recsum	is_empty	xs	return	hd	tl	y	c	y2	y3	y4
+unnamed-chunk-3	
+unnamed-chunk-4	a	list	is_empty	length	l	hd	stop	tl	data	mtcars	head
+unnamed-chunk-5	sum_pairs	is_empty	l	hd	tl
+unnamed-chunk-6	firstitems	is_empty	l	list	c	hd	tl
+unnamed-chunk-7	
