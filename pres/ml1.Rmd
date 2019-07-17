@@ -1,0 +1,194 @@
+---
+title: "machine learning in R"
+author: "David Josephs"
+---
+
+# Setup
+
+First, we will load all required libraries for these examples:
+
+```{r, message = F, warning = F}
+library(caret)
+library(FNN)
+library(fastNaiveBayes)
+library(tidyverse)
+library(doParallel)
+library(foreach)
+library(functional)
+library(ROCR)
+```
+
+## Data Loading
+
+```{r}
+dataurl <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"
+
+wine <- read_csv(dataurl, col_names = F)
+tail(wine)
+```
+
+### Data Fixing
+
+We want good column names, so we will follow the names here: [wine analysis link](http://dataaspirant.com/2017/01/09/knn-implementation-r-using-caret-package/)
+
+```{r}
+good_cols <- c("class",
+    "alcohol",
+    'malic_acid',
+    'ash',
+    'alkalinity',
+    'magnesium',
+    'total_phenols',
+    'flavanoids',
+    'nonflavonoids_phenols',
+    'proanthocyanins',
+    'color_intensity',
+    'hue',
+    'dilution',
+    'proline'
+    )
+
+fix_cols <- function(df){
+	colnames(df) <- good_cols
+	df$class <- (df$class)
+	df
+}
+wine <- fix_cols(wine)
+```
+
+## Train test split
+
+```{r}
+set.seed(12345)
+## WARNING: Danger function
+split <- function(df, p = 0.75, list = FALSE, ...) {
+	train_ind <- createDataPartition(df[[1]], p = p, list = list)
+	cat("creating training dataset...\n")
+	training <<- df[train_ind, ]
+	cat("completed training dataset, creating test set\n")
+	test <<- df[-train_ind, ]
+	cat("done")
+}
+split(wine)
+```
+
+# Exploratory data analysis
+
+Do this
+
+# Picking a knn model
+
+## what is knn
+
+## Picking a value for k
+
+There are other methods which we will explore later using k-folds CV
+
+For now, we will use the ASE to find the best value for k
+
+```{r}
+train_knn <- function(k) {
+	knn(train = training[-1], test = test[-1],  cl = as.factor(training$class), k)
+}
+```
+
+### Metrics for classification
+
+We can't use ASE, so what do we do?
+
+```{r}
+conmat <- function(predicted, expected){
+	cm <- as.matrix(table(Actual = as.factor(expected$class), Predicted = predicted))
+	cm
+}
+f1_score <- function(predicted, expected, positive.class="1") {
+    cm = conmat(predicted, expected)
+
+    precision <- diag(cm) / colSums(cm)
+    recall <- diag(cm) / rowSums(cm)
+    f1 <-  ifelse(precision + recall == 0, 0, 2 * precision * recall / (precision + recall))
+
+    #Assuming that F1 is zero when it's not possible compute it
+    f1[is.na(f1)] <- 0
+
+    #Binary F1 or Multi-class macro-averaged F1
+    ifelse(nlevels(expected) == 2, f1[positive.class], mean(f1))
+}
+
+accuracy <- function(predicted, expected){
+	cm <- conmat(predicted, expected)
+	sum(diag(cm)/length(test$class))
+}
+```
+
+lets test it out
+```{r}
+3 %>% train_knn %>% conmat(test)
+3 %>% train_knn %>% accuracy(test)
+3 %>% train_knn %>% f1_score(test)
+```
+
+### Tuning in parallel!
+
+Lets write a function that then gets us the accuracy and the f1-score for a given model:
+
+```{r}
+library(glue)
+get_scores <- function(k){
+	predictions <- train_knn(k)
+	f1 <- f1_score(predictions,test)
+	acc <- accuracy(predictions,test)
+	scores <- c(accuracy = acc, f1 = f1)	
+	scores
+}
+get_scores(3)
+```
+
+Now its time to get wild, we are going to use the foreach and doparallel libraries to get the scores for everyone!
+
+```{r}
+registerDoParallel(detectCores() -1)
+
+# parallel KNN for k 1:33
+# see how it is literally instantaneous
+foreach(i = 1:33, .combine = "rbind", .multicombine = T) %dopar% get_scores(i) %>% as_tibble -> scores
+
+
+
+
+scores$index <- 1:33
+
+library(ggplot2)
+library(reshape2)
+
+ggplot(data = melt(scores, id.vars = "index", variable.name = "metric"), aes(index, value)) + geom_line(aes(color = metric))
+```
+
+So it looks like we will pick 11 or 13 nearest neighbors. Now lets make this whole process into a little pipeline
+
+## Pipeline: KNN
+
+```{r}
+
+readfile <- function(url) read_csv(url, col_names = F)
+
+split2 <- function(df, p = 0.75, list = FALSE, ...) {
+	train_ind <- createDataPartition(df[[1]], p = p, list = list)
+	training <- df[train_ind, ]
+	test <- df[-train_ind, ]
+	list(training = training, test = test)
+}
+res <- split2(wine)
+
+make_knn <- function(k) {
+	function(lst) {
+		training <- lst$training
+		test <- lst$test
+		train_knn(k)
+	}
+}
+
+knn11 <- make_knn(11)
+knn_pipeline <- Compose(readfile, fix_cols, split2,knn11)
+knn_pipeline(dataurl)
+```

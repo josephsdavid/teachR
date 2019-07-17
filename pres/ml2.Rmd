@@ -1,0 +1,258 @@
+---
+title: "Machine Learning with caret: classification"
+output: html_document
+---
+
+```{r setup}
+library(caret)
+library(fastNaiveBayes)
+library(readr)
+library(functional)
+library(ggplot2)
+library(magrittr)
+```
+
+# Classification with R
+
+## KNN
+
+*what is knn?*
+
+## Data loading
+
+
+```{r}
+dataurl <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"
+
+wine <- read_csv(dataurl, col_names = F)
+```
+
+
+
+### Data Fixing
+
+We want good column names, so we will follow the names here: [wine analysis link](http://dataaspirant.com/2017/01/09/knn-implementation-r-using-caret-package/)
+
+```{r}
+good_cols <- c("class",
+    "alcohol",
+    'malic_acid',
+    'ash',
+    'alkalinity',
+    'magnesium',
+    'total_phenols',
+    'flavanoids',
+    'nonflavonoids_phenols',
+    'proanthocyanins',
+    'color_intensity',
+    'hue',
+    'dilution',
+    'proline'
+    )
+
+fix_cols <- function(df){
+	colnames(df) <- good_cols
+	df$class <- as.factor(df$class)
+	df
+}
+wine <- fix_cols(wine)
+wine
+```
+
+
+```{r}
+set.seed(3033)
+## WARNING: Danger function
+split <- function(df, p = 0.75, list = FALSE, ...) {
+	train_ind <- createDataPartition(df[[1]], p = p, list = list)
+	cat("creating training dataset...\n")
+	training <<- df[train_ind, ]
+	cat("completed training dataset, creating test set\n")
+	test <<- df[-train_ind, ]
+	cat("done")
+}
+
+split(wine)
+```
+
+
+## Picking a value for k
+
+First, we will set up our computer to process in parallel:
+
+```{r}
+library(doParallel)
+numcores <- parallel::detectCores() - 1
+cl <- makePSOCKcluster(numcores)
+registerDoParallel(cl)
+```
+
+Now we will make a knn model using `caret::train`:
+
+```{r}
+set.seed(3333)
+trainMethod <- trainControl(method = "repeatedcv",
+                            number = 10,
+                            repeats = 3)
+# k-folds cross validation
+# y ~ x
+knn_fit <- train(class ~ ., 
+                 data = training, 
+                 method = "knn",
+                 trControl = trainMethod,
+                 preProcess = c("center", "scale"),
+                 tuneLength = 10)
+
+knn_fit
+```
+
+
+
+Lets see what value for K we chose with our grid search:
+
+```{r}
+plot(knn_fit)
+```
+
+
+### Alternative with a known K:
+
+
+
+```{r}
+
+
+knn_fit2 <- knn3(training, training$class, k = 15, prob = FALSE)
+knn_fit2
+```
+
+```{r}
+test_pred <- predict(knn_fit, newdata = test)
+test_pred
+test_pred2 <- predict(knn_fit2, newdata = test, prob = F)
+test_pred2
+```
+
+# Assessing the model
+
+We do not have vector, numeric data, so how can we assess what we are doing?
+
+## Confusion matrix
+
+* accuracy
+* precision
+* recall
+* F1 score
+
+```{r}
+confusionMatrix(test_pred, test$class)
+```
+
+```{r}
+
+conmat <- function(predicted, expected){
+	cm <- as.matrix(table(Actual = as.factor(expected$class), Predicted = predicted))
+	cm
+}
+conmat(test_pred, test)
+f1_score <- function(predicted, expected, positive.class="1") {
+    cm = conmat(predicted, expected)
+    precision <- diag(cm) / colSums(cm)
+    recall <- diag(cm) / rowSums(cm)
+    f1 <-  ifelse(precision + recall == 0, 0, 2 * precision * recall / (precision + recall))
+    #Assuming that F1 is zero when it's not possible compute it
+    f1[is.na(f1)] <- 0
+
+    #Binary F1 or Multi-class macro-averaged F1
+    ifelse(nlevels(expected) == 2, f1[positive.class], mean(f1))
+}
+
+accuracy <- function(predicted, expected){
+	cm <- conmat(predicted, expected)
+	sum(diag(cm)/length(test$class))
+}
+get_scores <- function(predictions, test){
+	f1 <- f1_score(predictions,test)
+	acc <- accuracy(predictions,test)
+	scores <- c(accuracy = acc, f1 = f1)	
+	scores
+}
+pander(get_scores(test_pred, test))
+```
+
+# Naive Bayes
+
+## What is bayes theorem?
+## why is it naive?
+
+## Doing it
+
+```{r}
+nb_fit <- train(training, 
+                training$class,
+                trControl = trainMethod,
+                method = "nb",
+                tuneLength = 10
+                )
+nb_fit
+plot(nb_fit)
+```
+
+```{r}
+nb_pred <- predict(nb_fit, newdata = test)
+nb_pred
+```
+
+```{r}
+confusionMatrix(nb_pred, test$class)
+get_scores(nb_pred, test)
+```
+
+
+## Why not do it FAST
+
+detect the distribution:
+```{r}
+library(fastNaiveBayes)
+y <- training$class
+x <- training[-1]
+dist <- fastNaiveBayes.detect_distribution(x, nrows = nrow(x))
+dist
+```
+
+Make a model:
+
+```{r}
+fast_nb_fit <- fastNaiveBayes.mixed(x,y)
+fast_nb_fit
+```
+
+Make a prediction
+
+```{r}
+fast_pred <- predict(fast_nb_fit, newdata = test[-1])
+fast_pred
+```
+
+Assess
+```{r}
+confusionMatrix(fast_pred, test$class)
+get_scores(fast_pred, test)
+```
+
+
+# Make a pipeline
+
+
+
+## Make up some new data
+
+
+## Run new data through your machine learning pipeline
+
+# Close shop
+
+
+```{r}
+stopCluster(cl)
+```
