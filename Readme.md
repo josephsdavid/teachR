@@ -5,6 +5,10 @@
 ### Contents:
 
 * [pres](pres/): contains all Rmarkdown and knitted results. Contents below:
+	* [ml2](pres/ml2.Rmd)
+		* Contains an overview of caret, knn, and naive bayes 
+	* [ml1](pres/ml1.Rmd)
+		* contains overcomplicated knn code, good for an excercise in overly fancy R code and not much else
 	* [html-scraping](pres/html-scraping.md)
 		* Contains a primer on scraping websites with `rvest`, as well as a slight introduction to pipes, and a few user created functions. Read this then [scraping.R](R/scraping.R) as a followup with more code to play with. 
 	* [copyonmodify](pres/copyonmodify.md)
@@ -22,6 +26,8 @@
 		* Contains the first really advanced stuff that we will do in here, apply/lapply review, which is the equivalent mathematically of mapping, anonymous functions, lists of functions, "function factories" (closures), and finally brings everything together in one crazy example. Will be made into a .Rmd soon enough
 	* [lm_1.R](R/lm_1.R) 
 		* Contains the basics of linear modeling 
+	* [ml1.R](R/ml1.R)
+		* Contains overcomplicated knn 
 * [src](src/): contains C/C++ code that is used to speed up R. Currently this is empty, and we may not use this directory. Interested parties can make an issue request, email me, or message me on slack and we will work on this. For now, it is enough to know this is part of the structure of a big R project.
 * [fig](fig/): contains images and figures generated
 * [data](data/): contains minimal data. It is best to save data here not in csv format, but as RData/rda, because it is much much lighter.
@@ -57,7 +63,10 @@ df<-load('../data/myfile.RData')
 ```
 
 ## Links to other useful sites and readings
-
+* [caret documentation](https://topepo.github.io/caret/index.html)
+* [ml metrics](https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9)
+* [naive bayes overview](https://towardsdatascience.com/whats-so-naive-about-naive-bayes-58166a6a9eba)
+* [naive bayes math/fast naive bayes](https://cran.r-project.org/web/packages/fastNaiveBayes/vignettes/fastnaivebayes.html)
 * [awesome-msds](https://github.com/drake-smu/awesome-msds-smu)
 	* a MSDS student's repository containing awesome resources for the program 
 * [awesome-r](https://awesome-r.com/#awesome-r)
