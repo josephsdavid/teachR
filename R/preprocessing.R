@@ -11,20 +11,20 @@ library(doParallel) # go fast
 #  datadir <- "../data/"
 # function which imports the data as a list, then fixes up the names to be nice
 import <- function(path){
-	# first we list the files in the directory we specify
-	files <- list.files(path)
-	# we fund csvs
-	files <- files[grepl(files, pattern = ".csv")]
-	# we paste the path to our filename
-	filepaths <- sapply(files, function(x) paste0(path,x))
-	# We read in all the files
-	out <- lapply(filepaths, fread)
-	# we clean up the names
-	fnames <- gsub(".csv","",files)
-	fnames <- gsub("[[:digit:]]+","", fnames)
-	names(out) <- fnames
-	# return the list of data frames
-	out
+  # first we list the files in the directory we specify
+  files <- list.files(path)
+  # we fund csvs
+  files <- files[grepl(files, pattern = ".csv")]
+  # we paste the path to our filename
+  filepaths <- sapply(files, function(x) paste0(path,x))
+  # We read in all the files
+  out <- lapply(filepaths, fread)
+  # we clean up the names
+  fnames <- gsub(".csv","",files)
+  fnames <- gsub("[[:digit:]]+","", fnames)
+  names(out) <- fnames
+  # return the list of data frames
+  out
 }
 #  datas <- import(datadir)
 
@@ -32,13 +32,13 @@ import <- function(path){
 
 # sum up the NAs and combine into a vector, note we are using percentages here
 count_nas_single <- function(df){
-	sapply(df, function(x) sum(is.na(x))/length(x))
+  sapply(df, function(x) sum(is.na(x))/length(x))
 
 }
 
 # count the NAs of a whole list
 count_nas <- function(xs){
-	lapply(xs, count_nas_single)
+  lapply(xs, count_nas_single)
 }
 
 # pander(count_nas(datas))
@@ -182,46 +182,46 @@ count_nas <- function(xs){
 
 # convert a vector to a time series with the proper frequency (we will say years in this case)
 tots <- function(v){
-	ts(v, frequency = 365*24)
+  ts(v, frequency = 365*24)
 }
 # tots(datas[[1]]$PM_US) %>>% tail
 
 # convert a data frame into a list of time series objects, given column names
 totslist <- function(df){
-	# vector of column names which we do not want to convert to a time series
-	badlist <- c(
-		     "No",
-		     "year",
-		     "month",
-		     "day",
-		     "hour",
-		     "season",
-		     "cbwd"
-	)
-	# names of out data frame
-	nms <- colnames(df)
-	# coerce to a list
-	df <- as.list(df)
-	# if the column at [[name]] is on our list, return it, otherwise, convert 
-	# to a time series. This allows us to deal with different amounts of data 
-	# collections of time series data (some series have more PM collecting
-	# stations than others)
-	for (name in nms){
-		if (name %in% badlist){
-			df[[name]] <- df[[name]]
-		} else {
-			df[[name]]  <- tots(df[[name]])
-		}
-	}
-	df
-	
+  # vector of column names which we do not want to convert to a time series
+  badlist <- c(
+               "No",
+               "year",
+               "month",
+               "day",
+               "hour",
+               "season",
+               "cbwd"
+  )
+  # names of out data frame
+  nms <- colnames(df)
+  # coerce to a list
+  df <- as.list(df)
+  # if the column at [[name]] is on our list, return it, otherwise, convert 
+  # to a time series. This allows us to deal with different amounts of data 
+  # collections of time series data (some series have more PM collecting
+  # stations than others)
+  for (name in nms){
+    if (name %in% badlist){
+      df[[name]] <- df[[name]]
+    } else {
+      df[[name]]  <- tots(df[[name]])
+    }
+  }
+  df
+
 
 }
 # datas[[1]] %>>% totsdf %>>%str
 # datas[[1]] %>>% totslist%>>%str
 # turn all data frames in a list of data frames to time series objects
 totsall <- function(xs){
-	lapply(xs, totslist)
+  lapply(xs, totslist)
 }
 # str(datas[[1]]$PM_US)
 # datas %>>% totsall -> datas
@@ -230,20 +230,20 @@ totsall <- function(xs){
 # try na.ma but dont fail on error, instead just do standard type checking
 # if the output is a time series, impute the NAs, otherwise do nothing
 imp_test <- function(v){
-	out <- try(na.interpolation(v, "spline"))
-	ifelse(
-	       is.ts(out),
-	       return(out),
-	       return(v)
-	)
+  out <- try(na.interpolation(v, "spline"))
+  ifelse(
+         is.ts(out),
+         return(out),
+         return(v)
+  )
 }
 # impute the NAs of a single list, keep column names (.final)
 impute <- function(xs){
-	foreach(i = 1:length(xs),
-		.final = function(x){
-			setNames(x, names(xs))
-		}) %dopar% 
-		imp_test(xs[[i]])
+  foreach(i = 1:length(xs),
+          .final = function(x){
+            setNames(x, names(xs))
+          }) %dopar% 
+  imp_test(xs[[i]])
 }
 # example of parallel computing
 # cl <- makeCluster(11, type = "FORK")
@@ -254,7 +254,7 @@ impute <- function(xs){
 
 # impute NAs of the parent list
 impute_list <- function(xs){
-	lapply(xs, impute)
+  lapply(xs, impute)
 }
 
 # make a fast hash table
@@ -263,7 +263,7 @@ impute_list <- function(xs){
 # but the data is represented in a memory efficient way, an can be manipulated in complex ways
 # Think of it like a realy fast database for searching and inserting
 to_hash <- function(xs){
-	list2env(xs, envir = NULL, hash = TRUE)
+  list2env(xs, envir = NULL, hash = TRUE)
 }
 # final preprocessing function:
 

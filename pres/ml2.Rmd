@@ -10,6 +10,7 @@ library(readr)
 library(functional)
 library(ggplot2)
 library(magrittr)
+library(tidyverse)
 ```
 
 # Classification with R
@@ -35,20 +36,20 @@ We want good column names, so we will follow the names here: [wine analysis link
 
 ```{r}
 good_cols <- c("class",
-    "alcohol",
-    'malic_acid',
-    'ash',
-    'alkalinity',
-    'magnesium',
-    'total_phenols',
-    'flavanoids',
-    'nonflavonoids_phenols',
-    'proanthocyanins',
-    'color_intensity',
-    'hue',
-    'dilution',
-    'proline'
-    )
+	       "alcohol",
+	       'malic_acid',
+	       'ash',
+	       'alkalinity',
+	       'magnesium',
+	       'total_phenols',
+	       'flavanoids',
+	       'nonflavonoids_phenols',
+	       'proanthocyanins',
+	       'color_intensity',
+	       'hue',
+	       'dilution',
+	       'proline'
+)
 
 fix_cols <- function(df){
 	colnames(df) <- good_cols
@@ -56,7 +57,7 @@ fix_cols <- function(df){
 	df
 }
 wine <- fix_cols(wine)
-wine
+glimpse(wine)
 ```
 
 
@@ -73,6 +74,11 @@ split <- function(df, p = 0.75, list = FALSE, ...) {
 }
 
 split(wine)
+
+ggplot(data = wine, aes(x = malic_acid, fill = class)) + geom_density()
+ggplot(data = wine, aes(x = alkalinity, fill = class)) + geom_density()
+ggplot(data = wine, aes(x = ash, fill = class)) + geom_density()
+ggplot(data = wine, aes(x = magnesium, fill = class)) + geom_density()
 ```
 
 
@@ -92,18 +98,47 @@ Now we will make a knn model using `caret::train`:
 ```{r}
 set.seed(3333)
 trainMethod <- trainControl(method = "repeatedcv",
-                            number = 10,
-                            repeats = 3)
+			    number = 10,
+			    repeats = 3)
 # k-folds cross validation
 # y ~ x
 knn_fit <- train(class ~ ., 
-                 data = training, 
-                 method = "knn",
-                 trControl = trainMethod,
-                 preProcess = c("center", "scale"),
-                 tuneLength = 10)
+		 data = training, 
+		 method = "knn",
+		 trControl = trainMethod,
+		 preProcess = c("center", "scale"),
+		 tuneLength = 10)
 
 knn_fit
+# k-Nearest Neighbors 
+# 
+# 135 samples
+#  13 predictor
+#   3 classes: '1', '2', '3' 
+# 
+# Pre-processing:
+#  centered (13), scaled (13) 
+# Resampling: Cross-Validated (10 fold, repeated 3 times) 
+# Summary of sample sizes: 121, 122, 122, 121, 121, 121, ... 
+# Resampling results across tuning parameters:
+# 
+#   k   Accuracy   Kappa    
+#    5  0.9700549  0.9548756
+#    7  0.9676740  0.9516351
+#    9  0.9609280  0.9418362
+#   11  0.9579426  0.9370280
+#   13  0.9702686  0.9552588
+#   15  0.9722527  0.9579543
+#   17  0.9752442  0.9625294
+#   19  0.9681013  0.9519242
+#   21  0.9726496  0.9588742
+#   23  0.9726496  0.9589829
+# 
+# Accuracy was used to
+#  model using the
+#  largest value.
+# The final value used
+#  for the model was k = 17.
 ```
 
 
@@ -156,15 +191,15 @@ conmat <- function(predicted, expected){
 }
 conmat(test_pred, test)
 f1_score <- function(predicted, expected, positive.class="1") {
-    cm = conmat(predicted, expected)
-    precision <- diag(cm) / colSums(cm)
-    recall <- diag(cm) / rowSums(cm)
-    f1 <-  ifelse(precision + recall == 0, 0, 2 * precision * recall / (precision + recall))
-    #Assuming that F1 is zero when it's not possible compute it
-    f1[is.na(f1)] <- 0
+	cm = conmat(predicted, expected)
+	precision <- diag(cm) / colSums(cm)
+	recall <- diag(cm) / rowSums(cm)
+	f1 <-  ifelse(precision + recall == 0, 0, 2 * precision * recall / (precision + recall))
+	#Assuming that F1 is zero when it's not possible compute it
+	f1[is.na(f1)] <- 0
 
-    #Binary F1 or Multi-class macro-averaged F1
-    ifelse(nlevels(expected) == 2, f1[positive.class], mean(f1))
+	#Binary F1 or Multi-class macro-averaged F1
+	ifelse(nlevels(expected) == 2, f1[positive.class], mean(f1))
 }
 
 accuracy <- function(predicted, expected){
@@ -189,11 +224,11 @@ pander(get_scores(test_pred, test))
 
 ```{r}
 nb_fit <- train(training, 
-                training$class,
-                trControl = trainMethod,
-                method = "nb",
-                tuneLength = 10
-                )
+		training$class,
+		trControl = trainMethod,
+		method = "nb",
+		tuneLength = 10
+)
 nb_fit
 plot(nb_fit)
 ```

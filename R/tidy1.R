@@ -51,7 +51,7 @@ ds %>% mutate(Region = gsub("^S","J",Region), StateName = gsub("a$","s",StateNam
 # Chain time (also arrAangA)
 df <- mtcars
 is_whole <- function(x) {
-	all(floor(x) == x)
+  all(floor(x) == x)
 
 }
 df %>% select_if( is_whole, toupper)
@@ -95,11 +95,11 @@ df %>% select_if( is_whole, toupper)
 ds %>% select(-Division, -StateName, -matches('itude$'))
 ?gather
 ds %>% select(-Division, -StateName, -matches('itude$'))%>%
-	gather(Measure, Value, -Region)%>% data.frame
+  gather(Measure, Value, -Region)%>% data.frame
 
 
 ds %>% select(-Division, -Region, -matches('itude$'))%>%
-	gather(Measure, Value, -StateName) -> messy
+  gather(Measure, Value, -StateName) -> messy
 ?tidyr
 messy
 messy %>%	spread(Measure, Value)
@@ -109,41 +109,41 @@ mtcars %>% group_by(cyl)
 ds %>%
   select(-Division, -Region, -StateName) ->ds1
 ds1
-  ds1 %>%gather(Measure, Value) -> ds2
+ds1 %>%gather(Measure, Value) -> ds2
 ds2 %>%
   group_by(Measure) %>%
   summarise(Mean = mean(Value),
             SD = sd(Value),
             Median = median(Value),
             SampleSize = n())
-beer %>% group_by(type) %>% summarise(Mean = mean(ABV))
-# show off our broomies  
-library(broom)
-data(swiss)
-swiss
-swiss.model <- lm(Fertility ~ ., data = swiss)
-tidy(swiss.model)
-# gather (Key, Value, Column, column,...)
-swiss %>%
+  beer %>% group_by(type) %>% summarise(Mean = mean(ABV))
+  # show off our broomies  
+  library(broom)
+  data(swiss)
+  swiss
+  swiss.model <- lm(Fertility ~ ., data = swiss)
+  tidy(swiss.model)
+  # gather (Key, Value, Column, column,...)
+  swiss %>%
     gather(key = Indep, value = Xvalue, Agriculture, Fertility) -> swiss1
-    swiss1
-    
-swiss1 %>% filter(Indep == 'Agriculture', Xvalue == 17.0)
-    swiss1 %>%gather(Dep, Yvalue, Education, Catholic)-> swiss2
-    swiss2 %>% spread(Dep, Yvalue) %>% spread(Indep, Xvalue)
-    group_by(Dep, Indep) %>% 
+  swiss1
+
+  swiss1 %>% filter(Indep == 'Agriculture', Xvalue == 17.0)
+  swiss1 %>%gather(Dep, Yvalue, Education, Catholic)-> swiss2
+  swiss2 %>% spread(Dep, Yvalue) %>% spread(Indep, Xvalue)
+  group_by(Dep, Indep) %>% 
     do(tidy(lm(Yvalue ~ Xvalue + Infant.Mortality + Examination, data = .)))
 
-head(swiss)
-library(tidyverse)
-library(broom)
-data(swiss)
-swiss %>%
-  gather( Indep, Xvalue, Agriculture, Fertility)  %>%gather(gather(Dep, Yvalue, Education, Catholic)) %>%group_by(Dep, Indep) %>% do(tidy(lm(Yvalue ~ Xvalue + Infant.Mortality + Examination, data = .)))
-library(broom)
-# Using the swiss practice dataset.
-swiss %>%
-  gather(Indep, Xvalue, Fertility, Agriculture) %>%
-  gather(Dep, Yvalue, Education, Catholic) %>% 
-  group_by(Dep, Indep) %>% 
-  do(tidy(lm(Yvalue ~ Xvalue + Infant.Mortality + Examination, data = .)))
+  head(swiss)
+  library(tidyverse)
+  library(broom)
+  data(swiss)
+  swiss %>%
+    gather( Indep, Xvalue, Agriculture, Fertility)  %>%gather(gather(Dep, Yvalue, Education, Catholic)) %>%group_by(Dep, Indep) %>% do(tidy(lm(Yvalue ~ Xvalue + Infant.Mortality + Examination, data = .)))
+  library(broom)
+  # Using the swiss practice dataset.
+  swiss %>%
+    gather(Indep, Xvalue, Fertility, Agriculture) %>%
+    gather(Dep, Yvalue, Education, Catholic) %>% 
+    group_by(Dep, Indep) %>% 
+    do(tidy(lm(Yvalue ~ Xvalue + Infant.Mortality + Examination, data = .)))

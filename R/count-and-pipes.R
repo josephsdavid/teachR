@@ -36,11 +36,11 @@ mtcars %>% group_by(gear) %>% summarise(count=n())
 
 # A functio
 sumsqrt <- function(x){
-	sqrt(sum(x))
+  sqrt(sum(x))
 }
 
 mathfun <- function(m,o,p){
-	out <- p+o-m
+  out <- p+o-m
 }
 
 df <- data.frame(matrix(1:9,nrow=3))
@@ -94,7 +94,7 @@ dotfun(-56)
 # [1] 1.457468
 # This is the equivalent of, without pipes
 plainfun <- function(x){
-	sqrt(exp(sin(cos(x))))
+  sqrt(exp(sin(cos(x))))
 }
 plainfun(45)
 # [1] 1.284983

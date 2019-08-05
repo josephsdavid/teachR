@@ -9,11 +9,11 @@ a <- list(1:3, c(1.2,4.5,NA,46,-84),c(4,5), 2:25, c(4,5,6,7,8,9,10))
 a
 
 meanfun <-  function(x){ 
-	res <- c()
-       	for(i in seq_along(x)){
-		      res[i] <- (mean(x[[i]]))
+  res <- c()
+  for(i in seq_along(x)){
+    res[i] <- (mean(x[[i]]))
   }
-	return(res)
+  return(res)
 }
 
 as.data.frame(lapply(mtcars,mean))
@@ -27,11 +27,11 @@ typeof(mtcars)
 
 
 meanfun2 <-  function(x){ 
-	res <- c()
-       	for(i in seq_along(x)){
-		res[i] <- (mean(x[[i]], na.rm = T))
-	}
-	return(res)
+  res <- c()
+  for(i in seq_along(x)){
+    res[i] <- (mean(x[[i]], na.rm = T))
+  }
+  return(res)
 }
 
 meanfun2(a)
@@ -43,7 +43,7 @@ data(mtcars)
 # lets say we want to find the square of every sum of mtcars
 
 squaresum <- function(x){
-	(sum(x)^2)
+  (sum(x)^2)
 }
 
 lapply(mtcars, squaresum) %>% as.data.frame
@@ -52,10 +52,10 @@ lapply(mtcars, function(x) (sum(x))^2) # they are the same
 # list of functions
 
 operator <- list(
-		 mea = function(x) mean(x),
-		 med = function(x) median(x),
-		 squaresum = function(x) (sum(x))^2,
-		 summ = function(x) summary(x)
+                 mea = function(x) mean(x),
+                 med = function(x) median(x),
+                 squaresum = function(x) (sum(x))^2,
+                 summ = function(x) summary(x)
 )
 
 
@@ -73,7 +73,7 @@ operator$summ(x)
 # wild
 
 call_fun <- function(f, ...){
- 	f(...)
+  f(...)
 }
 # lets bring it all together now
 lapply(operator, call_fun, x)
@@ -86,10 +86,10 @@ lapply(operator, function(f) f(x))
 # function factories, closures
 
 power  <- function(exponent){
-	myfunction <- function(x){
-		x ^ exponent
-	}
-	return(myfunction)
+  myfunction <- function(x){
+    x ^ exponent
+  }
+  return(myfunction)
 }
 2^4
 4^7
@@ -132,16 +132,16 @@ gen.aruma.wge(n=200,s=11)
 
 
 tswgen <- function(n,sn = 0){
-	sig <- function(...){
-		gen.sigplusnoise.wge(n=n,...,sn=sn)
-	}
-	ari <- function(...){
-		gen.arima.wge(n=n,...,sn=sn)
-	}
-	aru <- function(...){
-		gen.aruma.wge(n=n,..., sn=sn)
-	}
-	list("sig"=sig,"ari"=ari,"aru"=aru)
+  sig <- function(...){
+    gen.sigplusnoise.wge(n=n,...,sn=sn)
+  }
+  ari <- function(...){
+    gen.arima.wge(n=n,...,sn=sn)
+  }
+  aru <- function(...){
+    gen.aruma.wge(n=n,..., sn=sn)
+  }
+  list("sig"=sig,"ari"=ari,"aru"=aru)
 }
 
 

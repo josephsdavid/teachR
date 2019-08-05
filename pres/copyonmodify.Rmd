@@ -7,13 +7,13 @@ output: rmarkdown::github.document
 For this little lesson, we will learn about the cool things R does when we copy objects, and some of the pitfalls of for loops. 
 We will be using Hadley's pryr package, which "prys back the covers of R"
 
-```{R}
+```{r}
 library(pryr)
 size_and_addr <- function(x){
-	cat(rep('-',30), '\n')
-	cat("Object size: ", object_size(x),"\n")
-	cat(rep('-',30), '\n')
-	cat("Address in memory: ", address(x))
+  cat(rep('-',30), '\n')
+  cat("Object size: ", object_size(x),"\n")
+  cat(rep('-',30), '\n')
+  cat("Address in memory: ", address(x))
 }
 ```
 

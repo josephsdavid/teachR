@@ -1,174 +1,4 @@
-library(tidyverse)
-library(cowplot)
-library(broom)
-library(caret)
-library(ggthemes)
-data(iris)
-head(iris)
-nrow(iris)
-
-
-samp_size <- floor(nrow(iris)*0.6)
-samp_size
-
-train_ind <- sample(1:(nrow(iris)), size = samp_size)
-?seq_len
-seq_len(nrow(iris))
-1:nrow(iris)
-nrow(iris)
-
-train <- iris[train_ind,]
-test <- iris[-train_ind,]
-head(train)
-head(test)
-
-s_size <- function(df,split) {
-  floor(nrow(df)*split)
-}
-sampler <- function(data, split, sn = 0){
-  if (sn != 0) set.seed(sn)	
-  train_ind <- sample(seq_len(nrow(data)), size = s_size(data, split))
-  train <- data[train_ind,]
-  test <- data[-train_ind, ]
-  list("train" = train,  "test" = test)
-
-}
-
-partitions  <- sampler(data = iris, split = 0.6, sn = 0)
-train <- partitions$train
-test <- partitions$test
-head(train)
-#    Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
-# 27          5.0         3.4          1.6         0.4     setosa
-# 20          5.1         3.8          1.5         0.3     setosa
-# 43          4.4         3.2          1.3         0.2     setosa
-# 88          6.3         2.3          4.4         1.3 versicolor
-# 35          4.9         3.1          1.5         0.2     setosa
-# 97          5.7         2.9          4.2         1.3 versicolor
-head(test)
-#    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-# 2           4.9         3.0          1.4         0.2  setosa
-# 3           4.7         3.2          1.3         0.2  setosa
-# 5           5.0         3.6          1.4         0.2  setosa
-# 7           4.6         3.4          1.4         0.3  setosa
-# 10          4.9         3.1          1.5         0.1  setosa
-
-# y ~ x
-plot(train$Sepal.Length ~ train$Petal.Width)
-
-
-iris_fit_simple <- lm(data = train, Sepal.Length ~ Petal.Width)
-
-abline(iris_fit_simple)
-
-iris_fit_simple <- lm( train$Sepal.Length ~ train$Petal.Width)
-summary(iris_fit_simple)
-iris_fit_simple$resid
-par(mfrow = c(1,1))
-x = 1:10
-y = x^4
-plot(y~x)
-x_lm <- lm( x~x)
-# Are the residuals normal
-# Do the residuals have a constant variance
-# Is the data the independent
-
-ggplot(data = iris_fit_simple, aes(x = .fitted, y = .resid))+ geom_point() + geom_line(aes(y = 0))
-par(mfrow = c(2,1))
-plot(iris_fit_simple, which = 1)
-plot(iris_fit_simple, which = 2)
-histogram(iris_fit_simple$resid)
-
-# Do the residuals look like a random cloud around the line y = 0
-# if yes, the data probably has constant mean and variance
-# if no, the data probably doesnt
-
-hist(iris_fit_simple$resid)
-# does the histogram look normal?
-# does the width look constant on both sides?
-
-
-summary(iris_fit_simple)
-
-# Sepal Length = 4.7 + .92* petal width
-
-broom::tidy(iris_fit_simple)
-# # A tibble: 2 x 5
-#   term        estimate std.error statistic   p.value
-#   <chr>          <dbl>     <dbl>     <dbl>     <dbl>
-# 1 (Intercept)    4.78     0.0729      65.5 3.34e-111
-# 2 Petal.Width    0.889    0.0514      17.3 2.33e- 37
-broom::augment(iris_fit_simple)
-
-glance(iris_fit_simple)
-
-
-broom::confint_tidy(iris_fit_simple)
-
-
-pred_iris <- predict.lm(iris_fit_simple, test)
-
-pred_iris
-test$Sepal.Length
-error <- pred_iris - test$Sepal.Length
-error
-
-square_error <- error^2
-
-square_error
-
-ASE <- mean(square_error)
-ASE
-
-
-
-
-ASE <- function(pred, obs) {
-  (pred - obs) %>% `^`(2) %>% mean
-}
-
-ASE(pred_iris, test$Sepal.Length)
-
-
-## the caret way
-data(USArrests)
-head(USArrests)
-# createDataPartition(AnyColumn, proportion, list = F)
-
-train_ind <- caret::createDataPartition(1:nrow(USArrests),  p = .6, list = F)
-train_ind
-train <- USArrests[train_ind,]
-test <- USArrests[-train_ind,]
-head(train)
-head(test)
-nrow(train)
-nrow(test)
-
-plot(train$Murder ~ train$UrbanPop)
-arrest_lm <- lm(data = train, Murder~UrbanPop)
-abline(arrest_lm)
-histogram(arrest_lm$resid)
-par(mfrow = c(1,1))
-plot(arrest_lm, which = 1)
-plot(arrest_lm, which = 2)
-
-
-# train test split
-# scatterplot
-# linear model
-# draw line on scatterplot
-# histogram
-# residuals vs fitted (which = 1)
-# q-q (which = 2)
-# say whether or not assumptions were met
-# (LATER) adjust to meet assumptions
-# summary
-# confidence intervals
-# interpret coeff.
-# predict on test
-# ASE
-# compare to other models
-
+# regression EDA
 data(mtcars)
 
 mtcars
@@ -259,7 +89,6 @@ hist(mtcars$mpg)
 # facet 
 
 
-plotAllNumeric(mtcars)
 str(mtcars)
 
 library(tidyverse)
@@ -279,7 +108,6 @@ library(gplots)
 
 
 # heatmap
-
 
 my_palette <- colorRampPalette(c("red", "white", "black"))
 heatmapper <- function(df){
@@ -473,9 +301,10 @@ summary(model3)
 # F-statistic: 29.22 on 5 and 26 DF,  p-value: 6.892e-10
 # 
 
+
 # exploring with base R and lapply
 # modify for your own data, this is geared for mtcars
-# for example train$income ~ train[[x]]
+# for example train$income ~ train[[x]] instead of mtcars
 plot_vs_response <- function(x){
   plot(mtcars$mpg ~ mtcars[[x]], xlab = x)
   lw1 <- loess(mtcars$mpg ~ mtcars[[x]])
@@ -497,3 +326,128 @@ par(mfrow = c(2,3))
 lapply(numNames, plot_vs_response)
 
 # how do you interpret this? remember how wt and disp are highly correlated??
+
+
+
+# Classification EDA(light example)
+
+
+library(caret)
+library(fastNaiveBayes)
+library(readr)
+library(functional)
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
+
+dataurl <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"
+
+wine <- read_csv(dataurl, col_names = F)
+good_cols <- c("class",
+	       "alcohol",
+	       'malic_acid',
+	       'ash',
+	       'alkalinity',
+	       'magnesium',
+	       'total_phenols',
+	       'flavanoids',
+	       'nonflavonoids_phenols',
+	       'proanthocyanins',
+	       'color_intensity',
+	       'hue',
+	       'dilution',
+	       'proline'
+)
+
+fix_cols <- function(df){
+	colnames(df) <- good_cols
+	df$class <- as.factor(df$class)
+	df
+}
+wine <- fix_cols(wine)
+glimpse(wine)
+
+
+set.seed(3033)
+## WARNING: Danger function
+split <- function(df, p = 0.75, list = FALSE, ...) {
+	train_ind <- createDataPartition(df[[1]], p = p, list = list)
+	cat("creating training dataset...\n")
+	training <<- df[train_ind, ]
+	cat("completed training dataset, creating test set\n")
+	test <<- df[-train_ind, ]
+	cat("done")
+}
+
+split(wine)
+
+ggplot(data = wine, aes(x = malic_acid, fill = class)) + geom_density()
+ggplot(data = wine, aes(x = alkalinity, fill = class)) + geom_density()
+ggplot(data = wine, aes(x = ash, fill = class)) + geom_density()
+ggplot(data = wine, aes(x = magnesium, fill = class)) + geom_density()
+
+
+library(doParallel)
+numcores <- parallel::detectCores() - 1
+cl <- makePSOCKcluster(numcores)
+registerDoParallel(cl)
+
+
+set.seed(3333)
+trainMethod <- trainControl(method = "repeatedcv",
+			    number = 10,
+			    repeats = 3)
+# k-folds cross validation
+# y ~ x
+# use train to do a grid search for best model, see 
+# https://topepo.github.io/caret/model-training-and-tuning.html#model-training-and-parameter-tuning
+knn_fit <- train(class ~ ., 
+		 data = training, 
+		 method = "knn",
+		 trControl = trainMethod,
+		 preProcess = c("center", "scale"),
+		 tuneLength = 10)
+
+knn_fit
+# k-Nearest Neighbors 
+# 
+# 135 samples
+#  13 predictor
+#   3 classes: '1', '2', '3' 
+# 
+# Pre-processing:
+#  centered (13), scaled (13) 
+# Resampling: Cross-Validated (10 fold, repeated 3 times) 
+# Summary of sample sizes: 121, 122, 122, 121, 121, 121, ... 
+# Resampling results across tuning parameters:
+# 
+#   k   Accuracy   Kappa    
+#    5  0.9700549  0.9548756
+#    7  0.9676740  0.9516351
+#    9  0.9609280  0.9418362
+#   11  0.9579426  0.9370280
+#   13  0.9702686  0.9552588
+#   15  0.9722527  0.9579543
+#   17  0.9752442  0.9625294
+#   19  0.9681013  0.9519242
+#   21  0.9726496  0.9588742
+#   23  0.9726496  0.9589829
+# 
+# Accuracy was used to
+#  model using the
+#  largest value.
+# The final value used
+#  for the model was k = 17.
+
+
+plot(knn_fit)
+
+
+test_pred <- predict(knn_fit, newdata = test)
+test_pred
+
+
+confusionMatrix(test_pred, test$class)
+
+# try with different predictors as per your EDA
+# an idea to do programaticly: try writing a function then lapplying all the different iterations (may require instead %dopar% or mclapply)

@@ -24,8 +24,8 @@ data(unemployment)
 hcmap("countries/us/us-all-all", data = unemployment,
       name = "Unemployment", value = "value", joinBy = c("hc-key", "code"),
       borderColor = "transparent") %>%
-  hc_colorAxis(dataClasses = color_classes(c(seq(0, 10, by = 2), 50))) %>% 
-  hc_legend(layout = "vertical", align = "right",
-            floating = TRUE, valueDecimals = 0, valueSuffix = "%") 
+hc_colorAxis(dataClasses = color_classes(c(seq(0, 10, by = 2), 50))) %>% 
+hc_legend(layout = "vertical", align = "right",
+          floating = TRUE, valueDecimals = 0, valueSuffix = "%") 
 
 

@@ -120,8 +120,8 @@ Next, lets check out the first and last ten items of cast:
 
 ```{r}
 ht <- function(x,...){
-	head(x,...)
-	tail(x,...)
+  head(x,...)
+  tail(x,...)
 }
 ht(cast,10)
 ```

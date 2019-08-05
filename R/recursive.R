@@ -1,7 +1,7 @@
 ## @knitr setup
 
 is_empty = function(xs) { # xs: a vector of any type
-        length(xs) == 0
+  length(xs) == 0
 }
 
 is_empty(c(1,2,3,4))
@@ -10,16 +10,16 @@ integer()
 is_empty(c())
 # Get the first element of a vector, raising an exception if the vector is empty.
 hd = function(xs) { # xs: a vector of any type
-        if (is_empty(xs)) stop("Vector is empty.")
-        else xs[1]
+  if (is_empty(xs)) stop("Vector is empty.")
+  else xs[1]
 }
 x <- c(2,3,4,5,6)
 hd(x)
 
 # Get the tail of a vector without its first element, raising an exception if the vector is empty.
 tl = function(xs) { # xs: a vector of any type
-        if (is_empty(xs)) stop("Vector is empty.")
-        else xs[-1]
+  if (is_empty(xs)) stop("Vector is empty.")
+  else xs[-1]
 }
 
 
@@ -29,12 +29,12 @@ tl(x)
 ## @knitr first
 
 recsum <- function(xs) {
-	if (is_empty(xs)) {
-	  return(0)
-	}
-	else {
-	  hd(xs) + recsum(tl(xs))
-	}
+  if (is_empty(xs)) {
+    return(0)
+  }
+  else {
+    hd(xs) + recsum(tl(xs))
+  }
 }
 y = c(3,4,5,6)
 hd(y)
@@ -51,17 +51,17 @@ recsum(y)
 a <- list(1:2,3:4)
 a
 is_empty <- function(l){
-	length(l)==0
+  length(l)==0
 }
 
 hd <- function(l){
-	if (is_empty(l)) stop("List is empty")
-	else l[[1]]
+  if (is_empty(l)) stop("List is empty")
+  else l[[1]]
 }
 
 tl <- function(l){
-	if(is_empty(l)) stop("List is empty")
-	else l[-1]
+  if(is_empty(l)) stop("List is empty")
+  else l[-1]
 }
 
 data(mtcars)
@@ -72,8 +72,8 @@ head(a,1)
 ## @knitr sumpair
 
 sum_pairs <- function(l){
-	if (is_empty(l)) 0
-	else hd(l)[1] + hd(l)[2] + sum_pairs(tl(l))
+  if (is_empty(l)) 0
+  else hd(l)[1] + hd(l)[2] + sum_pairs(tl(l))
 }
 
 ## @knitr firstitem
@@ -84,8 +84,8 @@ list()
 
 
 firstitems <- function(l) {
-	if (is_empty(l)) list()
-	else c(hd(l)[1], firstitems(tl(l)))
+  if (is_empty(l)) list()
+  else c(hd(l)[1], firstitems(tl(l)))
 }
 
 firstitems(b)
@@ -109,14 +109,14 @@ hd(a2)[1]
 ## @knitr countdown
 
 countdown <- function(n){
-	if (n == 0) integer()
-	else c(n,countdown(n-1))
+  if (n == 0) integer()
+  else c(n,countdown(n-1))
 }
 
 ## @knitr seconds
 
 
 seconds <- function(l) {
-	if (is_empty(l)) list()
-	else c(hd(l)[2], seconds(tl(l)))
+  if (is_empty(l)) list()
+  else c(hd(l)[2], seconds(tl(l)))
 }

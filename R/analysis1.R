@@ -54,9 +54,9 @@ lapply(list(sesd,sesw,sesm), plot)
 
 
 accuracy(fitted(sesd))
-                     
+
 accuracy(fitted(sesw))
-                     
+
 accuracy(fitted(sesm))
 
 
@@ -170,11 +170,11 @@ est_shang <- estimate(shang2, p=2, q = 0)
 acf(est_shang$res)
 ljung_box(est_shang$res, p =2, q =0)
 shang_seasonal <- fore_and_assess(type = aruma,
-				  x = shang,
-				  s = 365,
-				  phi = est_shang$phi,
-				  n.ahead = 24,
-				  limits = F
+                                  x = shang,
+                                  s = 365,
+                                  phi = est_shang$phi,
+                                  n.ahead = 24,
+                                  limits = F
 )
 
 est_shang2 <- estimate(shang3, p = 3, q = 1)
@@ -188,13 +188,13 @@ ljung_box(est_shang2$res, 3, 1)
 # pval       0.8229101        0.8017901       
 
 shang_aruma <- fore_and_assess(type = aruma,
-				  x = shang,
-				  s = 365,
-				  d = 1,
-				  phi = est_shang2$phi,
-				  theta = est_shang2$theta,
-				  n.ahead = 24,
-				  limits = F
+                               x = shang,
+                               s = 365,
+                               d = 1,
+                               phi = est_shang2$phi,
+                               theta = est_shang2$theta,
+                               n.ahead = 24,
+                               limits = F
 )
 
 shang_seasonal$ASE
@@ -242,7 +242,7 @@ bj <- usBJ$day
 
 bj %>>%  (difference(seasonal,.,365)) -> bjtr
 aicbj <- bj %>>%  (difference(seasonal,.,365)) %>>% 
-	aicbic(p = 0:10) 
+  aicbic(p = 0:10) 
 pander(aicbj)
 # 
 # 
@@ -295,12 +295,12 @@ ljung_box(est_bj$res,6,4)
 # pval       0.01098179       0.1784661       
 
 bj_seas <- fore_and_assess(type = aruma,
-				  x = bj,
-				  s = 365,
-				  phi = est_bj$phi,
-				  theta = est_bj$theta,
-				  n.ahead = 24,
-				  limits = F
+                           x = bj,
+                           s = 365,
+                           phi = est_bj$phi,
+                           theta = est_bj$theta,
+                           n.ahead = 24,
+                           limits = F
 )
 test <- window(bj_US, start = 7)[1:24]
 ase(test, bj_seas)
