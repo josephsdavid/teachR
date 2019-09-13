@@ -30,6 +30,8 @@
 		* Contains the basics of linear modeling 
 	* [ml1.R](R/ml1.R)
 		* Contains overcomplicated knn 
+	* [json2gif](R/json2gif.R)
+		* Contains simple sample code where a JSON is used to show the movement of bodies through time
 * [src](src/): contains C/C++ code that is used to speed up R. Currently this is empty, and we may not use this directory. Interested parties can make an issue request, email me, or message me on slack and we will work on this. For now, it is enough to know this is part of the structure of a big R project.
 * [fig](fig/): contains images and figures generated
 * [data](data/): contains minimal data. It is best to save data here not in csv format, but as RData/rda, because it is much much lighter.
