@@ -1,4 +1,6 @@
-# Building our own machine learning library - helpers
+# Building our own machine learning library
+
+# I am following an amazing blog series on this, which I will share. We will go a bit further than the blog posts
 
 # Always set a seed, or else you can get in trouble
 set.seed(49)
