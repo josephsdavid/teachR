@@ -1,0 +1,466 @@
+---
+title: "Bias and Inference in Machine Learning"
+author: "David"
+date: "`r Sys.Date()`"
+output: 
+        revealjs::revealjs_presentation:
+          df_print: paged
+          theme: white
+          transition: zoom
+          self_contained: false
+          reveal_plugins: ["chalkboard"]
+          reveal_options:
+            chalkboard:
+              theme: whiteboard
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+# for pretty data frames
+library(DT)
+# useful alias
+DT <- datatable
+```
+
+
+# Responsible Modeling
+
+```{r zoolander, echo = FALSE}
+knitr::include_graphics("https://i.imgur.com/uYs6KsN.mp4")
+```
+
+## Bias in AI: A massive problem
+
+>- Hidden racial bias in machine learning models
+>- Gender bias in credit card models (Steve Wozniak wife)
+>- Impossible screenings in job applications
+>- Any other examples?
+>- We will all be affected (lots of models)
+
+
+## Potential Solutions
+
+>- Highly technical options
+>- Simpler solutions for humans
+
+# EXAI: Machine Learning for Humans
+
+## Explainable AI
+
+>- But how can "AI" be explainable?
+>- How does this reduce bias?
+>- How does this affect my case study??
+
+## (Less important) Less Frustrating Code: Introducing MLR
+
+>- Uniform API for pretty much all R models
+>- Obviously outside of deep learning
+>- Readable code is more transparent, better, and arguably more ethical
+
+# Code walkthrough: Regression
+
+## Load in necessary packages {.smaller}
+
+<small>
+```{r packs, echo = c(-1,-4)}
+library(DALEX) # for data for now
+library(mlr) # what we are interested in!
+data(apartments)
+DT(apartments, class = 'compact')
+```
+</small>
+
+## Create a task
+
+```{r taskSetup}
+regr_task <- makeRegrTask(data = apartments, target = "m2.price")
+```
+
+>- Tasks allow us to pursue a machine learning task! 
+>- Specify whether we want to do regression, classification, etc
+
+
+## Create Learners
+
+```{r reglrn}
+regr_lrn_knn <- makeLearner("regr.kknn")
+regr_lrn_lm <- makeLearner("regr.lm")
+regr_lrn_rf <- makeLearner("regr.ranger")
+```
+
+## Get parameter set to optimize!
+
+```{r getPars, results = "hold"}
+getParamSet(regr_lrn_knn)
+getParamSet(regr_lrn_rf)
+getParamSet(regr_lrn_lm)
+```
+
+## Tune KNN!
+
+```{r}
+knn_paramSet <- makeParamSet(
+  makeIntegerParam("k", lower = 3, upper = 30)
+)
+rdesc = makeResampleDesc("CV", iters = 3L)
+ctrl <- makeTuneControlGrid()
+res <- tuneParams(regr_lrn_knn, 
+  task = regr_task, 
+  resampling=rdesc, 
+  measures = mse, 
+  par.set = knn_paramSet, 
+  control = ctrl)
+
+res
+```
+
+## Explore KNN tuning!
+
+```{r}
+khpe <- generateHyperParsEffectData(res)
+plotHyperParsEffect(khpe, x = "k", y = "mse.test.mean", plot.type = "line")
+```
+
+## Tune random forest
+
+We will only tune one parameter, just because y'all havent actually studied this
+
+```{r}
+rf_paramSet <- makeParamSet(
+  makeIntegerParam("num.trees", lower = 10, upper = 100, trafo = function(x) 10*x)
+)
+res2 <- tuneParams(regr_lrn_rf, 
+  task = regr_task, 
+  resampling=rdesc, 
+  measures = mse, 
+  par.set = rf_paramSet, 
+  control = ctrl)
+
+res2
+```
+
+## Explore again!
+
+```{r}
+
+rfhpe <- generateHyperParsEffectData(res2, trafo = TRUE)
+plotHyperParsEffect(rfhpe, x = "num.trees", y = "mse.test.mean", plot.type = "line")
+```
+
+## Set hyperparameters for model!
+
+```{r}
+knn_regr_tuned <- setHyperPars(regr_lrn_knn, k = res$x$k)
+rf_regr_tuned <- setHyperPars(regr_lrn_rf, num.trees = 600)
+```
+
+>- note we can refer around the res object
+>- also note we can set them ourselves!
+>- always always plot your tuning so you can find a simple model
+
+## Train Models!
+
+```{r}
+model_lm <- train(regr_lrn_lm, regr_task)
+model_knn <- train(knn_regr_tuned, regr_task)
+model_rf <- train(rf_regr_tuned, regr_task)
+```
+
+## Make predictions!!
+
+```{r}
+lm_preds <- predict(model_lm, newdata = apartmentsTest)
+knn_preds <- predict(model_knn, newdata = apartmentsTest)
+rf_preds <- predict(model_rf, newdata = apartmentsTest)
+data.frame("lm" = lm_preds$data$response,
+  "knn" = knn_preds$data$response,
+  "rf" = rf_preds$data$response)
+```
+
+## Make this "explainable": introducing DALEX
+
+```{r, results = "hide"}
+library(DALEX)
+library(DALEXtra)
+
+lm_explained <- explain_mlr(model_lm, 
+  data = apartmentsTest, 
+  y = apartmentsTest$m2.price,
+  label = "lm")
+knn_explained <- explain_mlr(model_knn, 
+  data = apartmentsTest, 
+  y = apartmentsTest$m2.price,
+  label = "knn")
+rf_explained <- explain_mlr(model_rf, 
+  data = apartmentsTest, 
+  y = apartmentsTest$m2.price,
+  label = "rf")
+explainers <- list(lm_explained, knn_explained, rf_explained)
+```
+
+## Model performance with DALEX
+```{r, fig.show = "hold", echo = 1:3}
+model_perfs <- lapply(explainers, model_performance)
+p1 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]])
+p2 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]], geom = "boxplot")
+```
+
+## Model Performance with DALEX
+```{r, echo = F}
+cowplot::plot_grid(p1, p2)
+```
+
+## Variable Importance
+
+>- Typically available in tree-based models such as rf and boosting
+>- But we can do it for any model with permutations
+>- How does it work?
+>- Calculate model scores after slightly altering a single variable
+>- repeat
+
+## Variable Importance
+
+```{r}
+library(ingredients)
+model_vis <- lapply(explainers, function(x) feature_importance(x, loss_function = loss_root_mean_square, type = "difference"))
+
+```
+
+## Variable Importance
+
+```{r, echo = FALSE}
+plot(model_vis[[1]], model_vis[[2]], model_vis[[3]])
+```
+
+## Partial Dependence
+
+Show the relationship between continuos variables and model outcomes!
+
+
+## Partial Dependence
+
+
+```{r}
+pdps <- lapply(explainers, function(x) partial_dependency(x, variables = "construction.year"))
+```
+
+## Partial Dependence
+
+```{r, echo = F}
+plot(pdps[[1]], pdps[[2]], pdps[[3]])
+```
+
+## Merging Paths!
+
+Show the relationship between a categorical variable and model response!
+
+
+```{r}
+mpps <- lapply(explainers, function(x) variable_response(x, variable = "district", type = "factor"))
+```
+
+## Merging Paths!
+
+```{r, echo = F}
+plot(mpps[[1]], mpps[[2]], mpps[[3]])
+```
+
+## Holy Grail funnel plot
+
+```{r}
+funnel <- funnel_measure(rf_explained, list(knn_explained, lm_explained),
+partition_data = cbind(apartmentsTest, 
+                                                    "m2.per.room" = apartmentsTest$surface/apartmentsTest$no.rooms),
+                             nbins = 5, measure_function = loss_root_mean_square, show_info = TRUE)
+```
+
+## Holy Grail Funnel plot
+
+```{r, echo = FALSE}
+plot(funnel)
+```
+
+
+# Classification now!
+
+## Step 1: Data
+
+```{r}
+data(wine, package = "breakDown")
+wine$quality <- ifelse(wine$quality>5, 1, 0)
+wine$quality <- factor(wine$quality)
+train_index <- sample(1:nrow(wine), 0.6 * nrow(wine))
+test_index <- setdiff(1:nrow(wine), train_index)
+wineTrain = wine[train_index,]
+wineTest <- wine[test_index,]
+```
+
+## Step 2: Task and Learner definition
+
+```{r}
+class_task <- makeClassifTask(data = wineTrain, target = "quality")
+
+classif_knn <- makeLearner("classif.kknn", predict.type = "prob")
+classif_nb <- makeLearner("classif.naiveBayes", predict.type = "prob")
+classif_rf <- makeLearner("classif.ranger", predict.type = "prob")
+```
+
+## Step 3, find params to tune
+
+```{r}
+lapply(list(classif_knn, classif_nb, classif_rf), getParamSet)
+```
+
+## Step 4, set up global tuning values
+
+```{r}
+rdesc = makeResampleDesc("CV", iters = 3L)
+ctrl <- makeTuneControlRandom(maxit = 20L)
+```
+
+## Tune KNN
+
+```{r}
+knn_paramSet <- makeParamSet(
+  makeIntegerParam("k", lower = 3, upper = 40)
+)
+
+res <- tuneParams(classif_knn, 
+  task = class_task, 
+  resampling=rdesc, 
+  measures = list(tnr, mlr::acc, tpr),
+  par.set = knn_paramSet, 
+  control = ctrl)
+```
+
+## Look at tuning!
+
+```{r}
+khpe <- generateHyperParsEffectData(res)
+spec <- plotHyperParsEffect(khpe, x = "k", y = "tnr.test.mean", plot.type = "line")
+sens <- plotHyperParsEffect(khpe, x = "k", y = "tpr.test.mean", plot.type = "line")
+accu <- plotHyperParsEffect(khpe, x = "k", y = "acc.test.mean", plot.type = "line")
+```
+
+## Look at tuning!
+
+```{r, echo = F}
+cowplot::plot_grid(accu, sens, spec)
+```
+
+## Define Tuned Model
+
+```{r}
+knn_tuned <- setHyperPars(classif_knn, k = 7)
+```
+
+## Tune Naive Bayes
+
+The version of naive bayes implemented in mlr honestly sucks, I would use the klaR version, which will ALSO work with DALEX. We will just use default naive bayes, and you can definitely tune the klaR nb yourself.
+
+## Tune random forest
+
+```{r}
+rf_paramSet <- makeParamSet(
+  makeIntegerParam("num.trees", lower = 10, upper = 100, trafo = function(x) 10*x)
+)
+ctrl2 <- makeTuneControlGrid()
+res2 <- tuneParams(classif_rf, 
+  task = class_task, 
+  resampling=rdesc, 
+  measures = list(tnr, mlr::acc, tpr),
+  par.set = rf_paramSet, 
+  control = ctrl2)
+
+res2
+```
+
+
+## Look at tuning!
+
+```{r}
+rfpe <- generateHyperParsEffectData(res2, trafo = TRUE)
+spec <- plotHyperParsEffect(rfpe, x = "num.trees", y = "tnr.test.mean", plot.type = "line")
+sens <- plotHyperParsEffect(rfpe, x = "num.trees", y = "tpr.test.mean", plot.type = "line")
+accu <- plotHyperParsEffect(rfpe, x = "num.trees", y = "acc.test.mean", plot.type = "line")
+```
+
+## Look at tuning!
+
+```{r, echo = F}
+cowplot::plot_grid(accu, sens, spec)
+```
+
+## Define Tuned Model
+
+```{r}
+rf_tuned <- setHyperPars(classif_rf, num.trees = 240)
+```
+
+
+## Train models
+
+```{r}
+models <- list(rf_tuned, knn_tuned, classif_nb)
+trained <- lapply(models, function(x) train(x, class_task))
+model_rf <- trained[[1]]
+model_knn <- trained[[2]]
+model_nb <- trained[[3]]
+```
+
+## Make predictions
+
+```{r}
+nb_preds <- predict(model_nb, newdata = wineTest)
+knn_preds <- predict(model_knn, newdata = wineTest)
+rf_preds <- predict(model_rf, newdata = wineTest)
+```
+
+Confusion matrices are left as an exercise ;)
+
+## Explain models!
+
+
+```{r, results = "hide"}
+lm_explained <- explain_mlr(model_nb, 
+  data = wineTest, 
+  y = wineTest$quality,
+  label = "nb")
+knn_explained <- explain_mlr(model_knn, 
+  data = wineTest, 
+  y = wineTest$quality,
+  label = "knn")
+rf_explained <- explain_mlr(model_rf, 
+  data = wineTest, 
+  y = wineTest$quality,
+  label = "rf")
+explainers <- list(rf_explained, knn_explained, rf_explained)
+```
+
+## Model Performance: residuals
+
+```{r}
+perfs <- lapply(explainers, model_performance)
+p1 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]])
+p2 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]], geom = "boxplot")
+```
+
+## Model Performance: residuals
+
+```{r, echo = F}
+cowplot::plot_grid(p1, p2)
+```
+
+# Everything Else...
+
+## Left as an exercise :)
+
+## Sources and resources for students:
+
+>- [DrWhy.AI, START HERE FOR EXPLAINABLE AI](https://github.com/ModelOriented/DrWhy)
+>- [DALEX vignette](https://raw.githack.com/pbiecek/DALEX_docs/master/vignettes/DALEX_mlr.html#3_classification_use_case_-_wine_data)
+>- [DALEX documentation](https://modeloriented.github.io/DALEX/)
+>- [DALEXtra docs](https://modeloriented.github.io/DALEXtra/index.html)
+>- Please note for when you move on from R, DALEX works with python too, as well as Keras and deep learning! This is an important topic which we need to be aware of
+>- [AMAZING mlr docs](https://mlr.mlr-org.com/articles/tutorial/task.html)
+>- This is a super important topic, which I have BARELY scratched today. If you are going to fall into a rabbit hole over the break, this is where you should go.

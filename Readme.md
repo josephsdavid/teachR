@@ -14,6 +14,8 @@
 	* [copyonmodify](pres/copyonmodify.md)
 		* Discusses how we should avoid for loops and "growing vectors" in general, due to some of the fun little quirks of R.
 * [R](R/): contains all R code. Contents below:
+	* [eda1/R](R/eda1.R) 
+		* Feature elimination tricks in R!!	 
 	* [final.R](R/final.R) 
 		* R example of automated EDA, some training of models, from our final office hours :( 
 	* [logo.R](R/logo.R)
