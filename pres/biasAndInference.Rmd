@@ -15,7 +15,7 @@ output:
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 # for pretty data frames
 library(DT)
 # useful alias
@@ -182,7 +182,7 @@ data.frame("lm" = lm_preds$data$response,
 ```{r, results = "hide"}
 library(DALEX)
 library(DALEXtra)
-
+library(ingredients)
 lm_explained <- explain_mlr(model_lm, 
   data = apartmentsTest, 
   y = apartmentsTest$m2.price,
@@ -451,13 +451,31 @@ p2 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]], geom = "boxplot
 cowplot::plot_grid(p1, p2)
 ```
 
+## More things,display effect per whatever
+
+```{r}
+selected_wines <- select_sample(wineTrain, n = 100)
+cps <- lapply(explainers, function(x) ceteris_paribus(x, selected_wines))
+pdps_sulph_alcohol <- lapply(cps, function(x) aggregate_profiles(x, variables = c("sulphates", "alcohol")))
+pdp_plots <- lapply(pdps_sulph_alcohol, plot)
+```
+
+## Localized Variable response!
+
+```{r, echo = F}
+cowplot::plot_grid(plotlist = pdp_plots)
+```
+
 # Everything Else...
 
 ## Left as an exercise :)
 
+>- There are a ton other things to explore here, especially regarding classification,and the positive and negative rates. Please refer to the manual
+
 ## Sources and resources for students:
 
->- [DrWhy.AI, START HERE FOR EXPLAINABLE AI](https://github.com/ModelOriented/DrWhy)
+>- [Manual for explainable AI in R and python, START HERE](https://pbiecek.github.io/PM_VEE/modelPerformance.html#modelPerformanceIntro)
+>- [DrWhy.AI, START HERE FOR PACKAGES](https://github.com/ModelOriented/DrWhy)
 >- [DALEX vignette](https://raw.githack.com/pbiecek/DALEX_docs/master/vignettes/DALEX_mlr.html#3_classification_use_case_-_wine_data)
 >- [DALEX documentation](https://modeloriented.github.io/DALEX/)
 >- [DALEXtra docs](https://modeloriented.github.io/DALEXtra/index.html)
