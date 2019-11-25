@@ -434,28 +434,28 @@ rf_explained <- explain_mlr(model_rf,
   data = wineTest, 
   y = wineTest$quality,
   label = "rf")
-explainers <- list(rf_explained, knn_explained, rf_explained)
+explainers2 <- list(nb_explained, knn_explained, rf_explained)
 ```
 
 ## Model Performance: residuals
 
 ```{r}
-perfs <- lapply(explainers, model_performance)
-p1 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]])
-p2 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]], geom = "boxplot")
+perfs <- lapply(explainers2, model_performance)
+plot1 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]])
+plot2 <- plot(model_perfs[[1]], model_perfs[[2]], model_perfs[[3]], geom = "boxplot")
 ```
 
 ## Model Performance: residuals
 
 ```{r, echo = F}
-cowplot::plot_grid(p1, p2)
+cowplot::plot_grid(plot1, plot2)
 ```
 
 ## More things,display effect per whatever
 
 ```{r}
 selected_wines <- select_sample(wineTrain, n = 100)
-cps <- lapply(explainers, function(x) ceteris_paribus(x, selected_wines))
+cps <- lapply(explainers2, function(x) ceteris_paribus(x, selected_wines))
 pdps_sulph_alcohol <- lapply(cps, function(x) aggregate_profiles(x, variables = c("sulphates", "alcohol")))
 pdp_plots <- lapply(pdps_sulph_alcohol, plot)
 ```

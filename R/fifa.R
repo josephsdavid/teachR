@@ -129,3 +129,16 @@ x <- 1:3
 # [1] 1 2 3
 
 as.numeric(fifa$Value)
+
+# tidy solution
+
+library(tidyverse)
+fifa <- read_csv("https://raw.githubusercontent.com/BivinSadler/MDS-6306-Doing-Data-Science-Fall-2019/Master/Unit%203/FIFA%20Players.csv")
+fifa$Value <- gsub("€", "", fifa$Value)
+v2 <- ifelse(grepl("M", fifa$Value), as.numeric(gsub("M","", fifa$Value))*1e6, as.numeric(gsub("K","", fifa$Value))*1e3)
+fifa$Value <- v2 
+
+
+
+
+
