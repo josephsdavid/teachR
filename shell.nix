@@ -104,6 +104,7 @@ in
        rPackages.profvis
        rPackages.pryr
        rPackages.tswge
+       rPackages.RcppArmadillo
        rPackages.benchmarkme
        python37Packages.pprintpp
        rPackages.jsonlite
