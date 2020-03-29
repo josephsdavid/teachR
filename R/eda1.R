@@ -157,13 +157,14 @@ mtcars$rvar <- rnorm(nrow(mtcars))
 length(unique(mtcars$vs))
 # [1] 2
 
-ggplot(data = mtcars) + geom_density(aes_string(x = "rvar", fill = "vs"), alpha = 0.5)
+ggplot(data = mtcars) + geom_density(aes_string(x = "mpg", fill = "am"), alpha = 0.5)
 
 # automated EDA!!!!!!!!!!!!
 # step 1, save target variable name
 target <- "am"
 # step 2, save explanator variable names
 numvars <- mtcars %>% keep(is.numeric) %>% colnames
+# [1] "mpg"  "disp" "hp"   "drat" "wt"   "qsec" "rvar"
 
 
 numplot <- function(df, explan, resp) {
@@ -173,14 +174,14 @@ numplot <- function(df, explan, resp) {
 numplot(mtcars, explan = "mpg", resp = "am")
 
 plotlist <- lapply(numvars, function(x) numplot(mtcars, x, "am"))
+library(cowplot)
+plot_grid(plotlist = plotlist)
 
 
 png()
 lapply(numvars, function(x) numplot(mtcars, x, "am"))
 dev.off()
 
-library(cowplot)
-plot_grid(plotlist = plotlist)
 
 
 # categorical vs categorical
